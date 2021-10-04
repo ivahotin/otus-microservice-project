@@ -80,3 +80,34 @@
 #### Сообщения
 
 ![mermaid-diagram-20200526103254](README.assets/messages.png)
+
+
+### Описание сервисов
+
+#### AuthService
+
+![mermaid-diagram-20200526103254](cards/authservicecard.png)
+
+#### ProfileService
+
+![mermaid-diagram-20200526103254](cards/profileservicecard.png)
+
+#### SearchService
+
+![mermaid-diagram-20200526103254](cards/searchservicecard.png)
+
+#### MessageService
+
+![mermaid-diagram-20200526103254](cards/messageservicecard.png)
+
+#### SubscriptionService
+
+![mermaid-diagram-20200526103254](cards/subscriptionservicecard.png)
+
+#### PostService
+
+![mermaid-diagram-20200526103254](cards/postservicecard.png)
+
+#### NewsfeedService
+
+![mermaid-diagram-20200526103254](cards/newsfeedservicecard.png)
