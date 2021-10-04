@@ -80,7 +80,6 @@
 #### Сообщения
 
 ![mermaid-diagram-20200526103254](README.assets/messages.png)
-<<<<<<< HEAD
 
 
 ### Описание сервисов
