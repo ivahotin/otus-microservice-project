@@ -1,0 +1,47 @@
+flowchart TD
+
+    sessionStorage[(Session storage)]
+    userStorage[(User storage)]
+    orderStorage[(Order storage)]
+    inventoryStorage[(Inventory storage)]
+
+    subgraph UserService
+    UserServiceInstance --> sessionStorage
+    UserServiceInstance --> userStorage
+    end
+
+    subgraph OrderService
+    OrderServiceInstance --> orderStorage
+    end
+
+    subgraph OrderOrchestrator
+    OrchestratorInstance
+    end
+
+    subgraph InventoryService
+    InventoryServiceInstance --> inventoryStorage
+    end
+
+    subgraph DeliveryService
+    DeliveryServiceInstance --> deliveryStorage[(Delivery storage)]
+    end
+
+    subgraph BillingService
+    BillingServiceInstance --> billingStorage[(BillingService)]
+    end
+
+    subgraph NotificationService
+    NotificationServiceInstance
+    end
+
+    User --> ApiGateway
+    ApiGateway -- 1. Проверка сессии --> UserService
+    UserService -- 2. Установка auth заголовков --> ApiGateway
+    ApiGateway -- 3. Создание заказа --> OrderService
+    OrderService -- 4. Запуск саги создания заказа --> OrderOrchestrator
+    OrderOrchestrator -- 5. Создание заказа в статусе <в обработке> --> OrderService
+    OrderOrchestrator -- 6. Бронирование товара в сервисе Склад --> InventoryService
+    OrderOrchestrator -- 7. Назначение курьера --> DeliveryService
+    OrderOrchestrator -- 8. Оплата заказа --> BillingService
+    OrderOrchestrator -- 9. Обновление статуса заказа --> OrderService
+    OrderService -- 10. Отправка уведомления --> NotificationService

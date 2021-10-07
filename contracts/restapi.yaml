@@ -1,0 +1,585 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: example@gmail.com
+  title: Интернет магазин
+  version: 0.1.0
+tags:
+  - name: order
+    description: Сервис заказов
+  - name: billing
+    description: Сервис биллинга
+  - name: notification
+    description: Сервис уведомлений
+  - name: user
+    description: Сервис пользователей
+  - name: inventory
+    description: Сервис склад
+  - name: delivery
+    description: Сервис доставок
+  - name: auth
+    description: Сервис регистрации и аутентификации
+security:
+  - cookieAuth: []
+paths:
+  /orders:
+    post:
+      summary: Cоздание заказа
+      description: Создание заказа. Заказ создается в статусе in_progress
+      operationId: createOrder
+      tags:
+        - order
+      parameters:
+        - in: header
+          name: If-Match
+          description: Последняя известная клиенту версия заказов.
+          schema:
+            type: string
+            format: uuid
+          required: true
+        - in: header
+          name: x-user-id
+          description: Идентификатор пользователя.
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        $ref: '#/components/requestBodies/Order'
+      responses:
+        '200':
+          description: Создание заказа прошло успешно
+          headers:
+            ETag:
+              schema:
+                type: integer
+              description: Последняя версия списка заказов пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOrderResponse'
+        '409':
+          description: Возник конфликт при создании заказа
+          headers:
+            ETag:
+              schema:
+                type: integer
+              description: Последняя версия списка заказов пользователя
+    get:
+      summary: Получение списка заказов пользователя
+      operationId: getOrdersById
+      tags:
+        - order
+      parameters:
+        - in: header
+          name: x-user-id
+          description: Идентификатор пользователя.
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        '200':
+          description: Список заказов пользователя
+          headers:
+            ETag:
+              schema:
+                type: integer
+              description: Последняя версия списка заказов пользователя
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+  /orders/{orderId}:
+    get:
+      summary: Получение заказа по идентификатору
+      operationId: getOrderById
+      tags:
+        - order
+      parameters:
+        - in: header
+          name: x-user-id
+          description: Идентификатор пользователя.
+          schema:
+            type: string
+            format: uuid
+          required: true
+        - in: path
+          name: orderId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        '200':
+          description: Заказ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: Заказ не найден
+  /items/reservations/:
+    post:
+      summary: Резервирование товаров
+      operationId: reserveItems
+      tags:
+        - inventory
+      parameters:
+        - in: header
+          name: x-user-id
+          description: Идентификатор пользователя.
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        $ref: '#/components/requestBodies/ReserveItemsRequest'
+      responses:
+        200:
+          description: Товары для заказа зарезервированы
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subtotal:
+                    type: integer
+        409:
+          description: Недостаточно товаров для резервирования
+    get:
+      summary: Все резервирования пользователя
+      operationId: getReservationsByUser
+      tags:
+        - inventory
+      parameters:
+        - in: header
+          name: x-user-id
+          description: Идентификатор пользователя.
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        200:
+          description: Все резервирования пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationsByOrderId'
+  /items/:
+    post:
+      summary: Пополнение товаров
+      operationId: addItems
+      tags:
+        - inventory
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                itemId:
+                  type: string
+                  format: uuid
+                quantity:
+                  type: integer
+                price:
+                  type: integer
+      responses:
+        200:
+          description: Товар добавлен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  itemId:
+                    type: string
+                    format: uuid
+    get:
+      summary: Поиск товара по заголовку
+      operationId: searchItems
+      tags:
+        - inventory
+      parameters:
+        - in: query
+          name: term
+          schema:
+            type: string
+        - in: query
+          name: xcur
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Страница с результатами поиска
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prevCurr:
+                    type: integer
+                  nextCurr:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Item'
+  /payments/credits:
+    put:
+      summary: Снятие суммы со счета пользователя
+      operationId: creditMoney
+      tags:
+        - billing
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        $ref: '#/components/requestBodies/Payment'
+      responses:
+        '201':
+          description: Деньги успешно сняты со счета
+        '409':
+          description: Недостаточное количество средств
+  /payments/debits:
+    put:
+      summary: Пополнение счета пользователя
+      operationId: debitMoney
+      tags:
+        - billing
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        $ref: '#/components/requestBodies/Payment'
+      responses:
+        '201':
+          description: Деньги успешно зачислены на счет
+  /notifications:
+    put:
+      summary: Отправка уведомления
+      operationId: sendNotification
+      tags:
+        - notification
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        $ref: '#/components/requestBodies/Notification'
+      responses:
+        '201':
+          description: Уведомление успешно создано
+    get:
+      summary: Получение уведомлений
+      operationId: getUserNotification
+      tags:
+        - notification
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+            format: uuid
+          description: Идентификатор пользователя
+      responses:
+        '200':
+          description: Уведомления пользователя
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+  /users/{userId}:
+    get:
+      summary: Получение профиля пользователя
+      operationId: getUserProfile
+      tags:
+        - user
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        '200':
+          description: Профиль пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+
+  /deliveries/:
+    post:
+      summary: Резервирование доставки
+      operationId: ReserveDelivery
+      tags:
+        - delivery
+      parameters:
+        - in: header
+          name: IdempotencyKey
+          schema:
+            type: string
+            format: uuid
+          description: Ключ идемпотентности
+      responses:
+        '200':
+          description: Доставка зарезервирована
+
+  /auth/login/:
+    post:
+      summary: Аутентификация пользователей
+      operationId: auth
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Пользователь прошел логин
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: session_id=abcde12345; Path=/; HttpOnly
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_id
+  schemas:
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        consumerId:
+          type: string
+          format: uuid
+        price:
+          type: integer
+          format: int64
+        status:
+          type: boolean
+      required:
+        - consumer
+        - price
+        - status
+    Payment:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+          format: int64
+      required:
+        - userId
+        - price
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+      required:
+        - userId
+        - firstName
+        - lastName
+        - email
+        - phone
+    Item:
+      type: object
+      properties:
+        itemId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        price:
+          type: integer
+    Delivery:
+      type: object
+      properties:
+        type:
+          type: string
+        city:
+          type: string
+        time:
+          type: string
+          format: date-time
+    Notification:
+      type: object
+      properties:
+        message:
+          type: string
+        userId:
+          type: string
+          format: uuid
+    CreateOrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+          format: uuid
+      required:
+        - orderId
+    ReservationsByOrderId:
+      type: array
+      items:
+        type: object
+        properties:
+          orderId:
+            type: string
+            format: uuid
+          items:
+            type: array
+            items:
+              type: object
+              properties:
+                itemId:
+                  type: string
+                  format: uuid
+                quantity:
+                  type: string
+                  format: uuid
+  requestBodies:
+    Order:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              consumerId:
+                type: string
+                format: uuid
+              items:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+              delivery:
+                $ref: '#/components/schemas/Delivery'
+          example:
+            consumerId: 'cf7b1894-a53c-4df6-8614-77d7926db59d'
+            items:
+              - itemId: 12334122
+                title: Самокат
+                description: Самый лучший самокат
+                quantity: 1
+                price: 100
+              - itemId: 1233451
+                title: Велосипед
+                description: Еще один велосипед
+                quantity: 2
+                price: 500
+            delivery:
+              type: self-delivery
+              city: Moscow
+              time: '2021-09-09 12:00:00'
+      description: Order for user with price 100
+      required: true
+    ReserveItemsRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              orderId:
+                type: string
+                format: uuid
+              consumerId:
+                type: string
+                format: uuid
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    itemId:
+                      type: integer
+                    quantity:
+                      type: string
+                      format: uuid
+          example:
+            consumerId: 'cf7b1894-a53c-4df6-8614-77d7926db59d'
+            orderId: 'cf7b1878-a53c-4df6-8614-77d7926db60k'
+            items:
+              - itemId: 123456
+                quantity: 2
+              - itemId: 54231233
+                quantity: 1
+    Payment:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Payment'
+          example:
+            userId: 'cf7b1894-a53c-4df6-8614-77d7926db59d'
+            price: 100
+    Notification:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Notification'
+          example:
+            message: 'Ваш заказ успешно cоздан'
+            userId: 'cf7b1894-a53c-4df6-8614-77d7926db59d'
