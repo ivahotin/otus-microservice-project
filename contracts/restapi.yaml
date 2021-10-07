@@ -147,6 +147,8 @@ paths:
                 properties:
                   subtotal:
                     type: integer
+                  reservationId:
+                    type: integer
         409:
           description: Недостаточно товаров для резервирования
     get:
@@ -258,6 +260,13 @@ paths:
       responses:
         '201':
           description: Деньги успешно сняты со счета
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: integer
         '409':
           description: Недостаточное количество средств
   /payments/debits:
@@ -278,6 +287,13 @@ paths:
       responses:
         '201':
           description: Деньги успешно зачислены на счет
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: integer
   /notifications:
     put:
       summary: Отправка уведомления
@@ -356,6 +372,13 @@ paths:
       responses:
         '200':
           description: Доставка зарезервирована
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deliveryId:
+                    type: string
 
   /auth/login/:
     post:
@@ -403,7 +426,13 @@ components:
           type: integer
           format: int64
         status:
-          type: boolean
+          type: string
+        deliveryId:
+          type: string
+        reservationId:
+          type: string
+        paymentId:
+          type: string
       required:
         - consumer
         - price
