@@ -34,7 +34,7 @@
 
 ## Общая схема взаимодействия сервисов
 
-![mermaid-diagram-20200526103254](README.assets/schema.png)
+![mermaid-diagram-20200526103254](docs/README.assets/schema.png)
 
 ## Описание сервисов
 
@@ -74,7 +74,7 @@
 
 ## Контракты
 
-[Описание контрактов](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/ivahotin/otus-microservice-project/master/contracts/restapi.yaml)
+[Описание контрактов](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/ivahotin/otus-microservice-project/master/docs/contracts/restapi.yaml)
 
 ## Альтернативы
 

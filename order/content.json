@@ -1,0 +1,24 @@
+{
+  "consumerId": "cf7b1894-a53c-4df6-8614-77d7926db59d",
+  "items": [
+    {
+      "itemId": 12334122,
+      "title": "Самокат",
+      "description": "Самый лучший самокат",
+      "quantity": 1,
+      "price": 100
+    },
+    {
+      "itemId": 1233451,
+      "title": "Велосипед",
+      "description": "Еще один велосипед",
+      "quantity": 2,
+      "price": 23
+    }
+  ],
+  "delivery": {
+    "type": "self-delivery",
+    "city": "Moscow",
+    "datetime": "2021-09-09T12:00:00"
+  }
+}

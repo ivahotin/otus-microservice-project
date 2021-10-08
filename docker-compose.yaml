@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  order_db:
+    image: postgres
+    container_name: order-db
+    volumes:
+      - ./order/migrations/create_order_tables.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_DB=order_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    env_file:
+      - ./order/.local.env
+    networks:
+      - order-network
+    ports:
+      - "5432:5432"
+
+networks:
+  order-network:
+    driver: bridge
