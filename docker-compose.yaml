@@ -31,6 +31,21 @@ services:
       - online
     ports:
       - "5433:5432"
+  delivery_db:
+    image: postgres
+    container_name: delivery-db
+    volumes:
+      - ./delivery/migrations/create_tables.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_DB=delivery_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    env_file:
+      - ./delivery/.local.env
+    networks:
+      - online
+    ports:
+      - "5434:5432"
 
 networks:
   online:

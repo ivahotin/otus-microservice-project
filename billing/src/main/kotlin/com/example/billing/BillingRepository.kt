@@ -60,8 +60,8 @@ class BillingRepository(
                 "select * from billing_accounts where consumer_id = :id::uuid",
                 mapOf("id" to consumerId)
             ) {
-                rc, _ ->
-                BillingAccount(UUID.fromString(rc.getString("consumer_id")), rc.getLong("amount"))
+                rs, _ ->
+                BillingAccount(UUID.fromString(rs.getString("consumer_id")), rs.getLong("amount"))
             }
         } catch (exc: EmptyResultDataAccessException) {
             throw BillingNotFoundException()
