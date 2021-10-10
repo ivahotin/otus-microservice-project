@@ -13,10 +13,25 @@ services:
     env_file:
       - ./order/.local.env
     networks:
-      - order-network
+      - online
     ports:
       - "5432:5432"
+  billing_db:
+    image: postgres
+    container_name: billing-db
+    volumes:
+      - ./billing/migrations/create_tables.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_DB=billing_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    env_file:
+      - ./billing/.local.env
+    networks:
+      - online
+    ports:
+      - "5433:5432"
 
 networks:
-  order-network:
+  online:
     driver: bridge
