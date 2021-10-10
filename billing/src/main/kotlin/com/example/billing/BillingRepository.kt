@@ -40,7 +40,7 @@ class BillingRepository(
     fun debit(idempotencyKey: String, consumerId: UUID, amount: Long): PaymentOperationResult {
         try {
             jdbcTemplate.update(
-                "insert into transactions (idempotency_key, created_at, amount, is_cancelled) values (:key::uuid, now(), -:amount, false)",
+                "insert into transactions (idempotency_key, created_at, amount, is_cancelled) values (:key::uuid, now(), :amount, false)",
                 mapOf("key" to idempotencyKey, "amount" to amount)
             )
         } catch (exc: DuplicateKeyException) {
