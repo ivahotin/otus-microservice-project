@@ -46,6 +46,21 @@ services:
       - online
     ports:
       - "5434:5432"
+  inventory_db:
+    image: postgres
+    container_name: inventory-db
+    volumes:
+      - ./inventory/migrations/create_tables.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_DB=inventory_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    env_file:
+      - ./inventory/.local.env
+    networks:
+      - online
+    ports:
+      - "5435:5432"
 
 networks:
   online:
