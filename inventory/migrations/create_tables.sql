@@ -14,7 +14,8 @@ create table if not exists reservations (
     consumer_id         uuid not null,
     idempotency_key     uuid not null,
     items               jsonb not null,
-    subtotal            integer not null
+    subtotal            integer not null,
+    is_cancelled        boolean not null default false
 );
 
 create unique index concurrently if not exists idempotency_key_idx on reservations (idempotency_key);

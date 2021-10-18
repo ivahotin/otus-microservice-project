@@ -15,11 +15,11 @@ import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -36,10 +36,11 @@ class InventoryController(
     ): ItemsResponse {
         val query = ItemsQuery(term, cursor, limit)
         val items = inventoryQueries.findItems(query)
+        val nextCursor = items.maxOfOrNull { it.itemId } ?: 0L
         return ItemsResponse(
             items,
             query.cursor,
-            items.maxOf { it.itemId }
+            nextCursor
         )
     }
 
@@ -55,10 +56,14 @@ class InventoryController(
         return when (val result = inventoryUseCases.reserveItems(idempotencyKey, reservationCommand)) {
             is InsufficientAmount -> ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build<Any?>()
             is ReservationMade -> ResponseEntity.ok(ReserveResponse(
-                reservationId = result.reservationId,
-                subtotal = result.subtotal
+                reservationId = result.reservationId
             ))
         }
+    }
+
+    @PostMapping("/items/reservations/cancellations/{reservationId}")
+    fun cancelReservation(@PathVariable("reservationId") reservationId: Long) {
+        inventoryUseCases.cancelReservation(reservationId)
     }
 
     @GetMapping("/items/reservations")

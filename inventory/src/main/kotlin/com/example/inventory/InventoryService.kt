@@ -24,9 +24,16 @@ class InventoryService(private val storageAdapter: InventoryStorageAdapter): Inv
         storageAdapter.insertItem(command.title, command.description, command.quantity, command.price)
 
     override fun reserveItems(idempotencyKey: UUID, command: ReservationCommand): ReservationResult {
-        val subtotal = command.items.sumOf { it.price * it.quantity }
-        val reservationId = storageAdapter.reserve(command.consumerId, idempotencyKey, command.items, subtotal)
-        return if (reservationId == null) InsufficientAmount else ReservationMade(reservationId, subtotal)
+        val reservationId = try {
+            storageAdapter.reserve(command.consumerId, idempotencyKey, command.items)
+        } catch (exc: com.example.inventory.InsufficientAmount) {
+            null
+        }
+        return if (reservationId == null) InsufficientAmount else ReservationMade(reservationId)
+    }
+
+    override fun cancelReservation(reservationId: Long) {
+        storageAdapter.cancelReservation(reservationId)
     }
 
     override fun getMyReservations(consumerId: UUID): List<Reservation> =

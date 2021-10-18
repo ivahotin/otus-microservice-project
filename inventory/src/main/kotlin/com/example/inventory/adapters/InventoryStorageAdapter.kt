@@ -2,6 +2,7 @@ package com.example.inventory.adapters
 
 import com.example.inventory.domain.Item
 import com.example.inventory.domain.Reservation
+import com.example.inventory.usecases.ReservationItem
 import java.util.UUID
 
 interface InventoryStorageAdapter {
@@ -11,7 +12,7 @@ interface InventoryStorageAdapter {
     fun reserve(
         consumerId: UUID,
         idempotencyKey: UUID,
-        items: List<Item>,
-        subtotal: Int
+        items: List<ReservationItem>
     ): Long?
+    fun cancelReservation(reservationId: Long)
 }
