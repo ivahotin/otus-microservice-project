@@ -23,6 +23,7 @@ dependencies {
 	implementation("org.springframework.kafka:spring-kafka")
 	implementation("org.springframework.boot:spring-boot-starter-json")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("io.temporal:temporal-sdk:1.0.9")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.kafka:spring-kafka-test")
 }

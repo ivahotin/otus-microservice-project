@@ -133,6 +133,50 @@ services:
       PLUGIN_PATH: "/usr/share/java"
     networks:
       - online
+  cassandra:
+    container_name: temporal-cassandra
+    image: cassandra:3.11.9
+    networks:
+      - online
+    ports:
+      - 9042:9042
+  temporal:
+    container_name: temporal
+    depends_on:
+      - cassandra
+    environment:
+      - CASSANDRA_SEEDS=cassandra
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/dynamicconfig.yaml
+    image: temporalio/auto-setup:1.12.3
+    networks:
+      - online
+    ports:
+      - 7233:7233
+    volumes:
+      - ./temporal:/etc/temporal/config/dynamicconfig
+  temporal-admin-tools:
+    container_name: temporal-admin-tools
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_CLI_ADDRESS=temporal:7233
+    image: temporalio/admin-tools:1.12.3
+    networks:
+      - online
+    stdin_open: true
+    tty: true
+  temporal-web:
+    container_name: temporal-web
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_GRPC_ENDPOINT=temporal:7233
+      - TEMPORAL_PERMIT_WRITE_API=true
+    image: temporalio/web:1.12.0
+    networks:
+      - online
+    ports:
+      - 8088:8088
 
 networks:
   online:
