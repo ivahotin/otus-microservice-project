@@ -37,4 +37,7 @@ class ReviewsConsumerConfig(private val kafkaProperties: KafkaProperties) {
         props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         return props
     }
+
+    @Bean
+    fun getActivityImpl(): OrderActivities = OrderActivitiesImpl()
 }

@@ -4,7 +4,8 @@ create table if not exists deliveries (
     idempotency_key uuid not null,
     type varchar(20) not null,
     city varchar(60) not null,
-    delivery_datetime timestamp not null
+    delivery_datetime timestamp not null,
+    is_cancelled boolean not null
 );
 
 create unique index concurrently if not exists idempotency_key_idx on deliveries using btree (idempotency_key);

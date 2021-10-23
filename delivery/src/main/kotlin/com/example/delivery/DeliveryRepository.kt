@@ -8,7 +8,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Repository
 
 private const val updateStatement = "insert into deliveries (idempotency_key, type, city, delivery_datetime) values (?::uuid, ?, ?, ?) on conflict (idempotency_key) do nothing"
-private const val getDeliveryByIdStatement = "select id, idempotency_key, type, city, delivery_datetime from deliveries where id = ?"
+private const val getDeliveryByIdStatement = "select id, idempotency_key, type, city, delivery_datetime, is_cancelled from deliveries where id = ?"
+private const val cancelStatement = "update deliveries set is_cancelled = true where id = ?"
 
 @Repository
 class DeliveryRepository(private val jdbcTemplate: JdbcTemplate) {
@@ -30,6 +31,10 @@ class DeliveryRepository(private val jdbcTemplate: JdbcTemplate) {
         return keyHolder.key?.toLong() ?: getDeliveryIdByIdempotencyKey(createDeliveryCommand.idempotencyKey)
     }
 
+    fun cancelDelivery(deliveryId: Long) {
+        jdbcTemplate.update(cancelStatement, deliveryId)
+    }
+
     fun getDeliveryById(deliveryId: Long): Delivery? {
         return try {
             jdbcTemplate.queryForObject(
@@ -40,7 +45,8 @@ class DeliveryRepository(private val jdbcTemplate: JdbcTemplate) {
                         idempotencyKey = UUID.fromString(rs.getString("idempotency_key")),
                         type = rs.getString("type"),
                         city = rs.getString("city"),
-                        deliveryDatetime = rs.getTimestamp("delivery_datetime").toLocalDateTime()
+                        deliveryDatetime = rs.getTimestamp("delivery_datetime").toLocalDateTime(),
+                        isCancelled = rs.getBoolean("is_cancelled")
                     )
                 },
                 deliveryId

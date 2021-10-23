@@ -8,5 +8,6 @@ data class Delivery(
     val idempotencyKey: UUID,
     val type: String,
     val city: String,
-    val deliveryDatetime: LocalDateTime
+    val deliveryDatetime: LocalDateTime,
+    val isCancelled: Boolean = false
 )

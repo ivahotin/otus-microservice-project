@@ -1,5 +1,6 @@
 package com.example.orchestrator
 
+import com.example.orchestrator.dto.CreatedOrderEvent
 import io.temporal.workflow.WorkflowInterface
 import io.temporal.workflow.WorkflowMethod
 

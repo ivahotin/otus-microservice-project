@@ -133,19 +133,25 @@ services:
       PLUGIN_PATH: "/usr/share/java"
     networks:
       - online
-  cassandra:
-    container_name: temporal-cassandra
-    image: cassandra:3.11.9
+  mysql:
+    container_name: temporal-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    image: mysql:5.7
     networks:
       - online
     ports:
-      - 9042:9042
+      - 3306:3306
   temporal:
     container_name: temporal
     depends_on:
-      - cassandra
+      - mysql
     environment:
-      - CASSANDRA_SEEDS=cassandra
+      - DB=mysql
+      - DB_PORT=3306
+      - MYSQL_USER=root
+      - MYSQL_PWD=root
+      - MYSQL_SEEDS=mysql
       - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/dynamicconfig.yaml
     image: temporalio/auto-setup:1.12.3
     networks:

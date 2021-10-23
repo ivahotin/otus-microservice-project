@@ -37,4 +37,10 @@ class DeliveryController(private val deliveryRepository: DeliveryRepository) {
             null -> ResponseEntity.status(HttpStatus.NOT_FOUND).build<Any?>()
             else -> ResponseEntity.ok(delivery)
         }
+
+    @PostMapping("/deliveries/{deliveryId}/cancellation")
+    fun cancelDelivery(@PathVariable deliveryId: Long): ResponseEntity<*> {
+        deliveryRepository.cancelDelivery(deliveryId)
+        return ResponseEntity.ok().build<Any?>()
+    }
 }

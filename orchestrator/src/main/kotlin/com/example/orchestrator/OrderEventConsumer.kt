@@ -1,14 +1,11 @@
 package com.example.orchestrator
 
+import com.example.orchestrator.dto.CreatedOrderEvent
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.temporal.api.enums.v1.WorkflowIdReusePolicy
 import io.temporal.client.WorkflowClient
@@ -16,7 +13,6 @@ import io.temporal.client.WorkflowExecutionAlreadyStarted
 import io.temporal.client.WorkflowOptions
 import io.temporal.common.RetryOptions
 import java.time.Duration
-import java.time.LocalDateTime
 import java.util.UUID
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
@@ -28,33 +24,7 @@ data class Payload(
     val payload: String
 )
 
-data class Message(
-    val payload: Payload
-)
-
-data class DeliveryDetail(
-    val type: String,
-    val city: String,
-    @JsonDeserialize(using = LocalDateTimeDeserializer::class)
-    @JsonSerialize(using = LocalDateTimeSerializer::class)
-    val datetime: LocalDateTime
-)
-
-data class Item(
-    val itemId: Long,
-    val title: String,
-    val description: String,
-    val quantity: Int,
-    val price: Int
-)
-
-data class CreatedOrderEvent(
-    val orderId: UUID,
-    val items: List<Item>,
-    val delivery: DeliveryDetail,
-    val price: Long,
-    val consumerId: UUID
-)
+data class Message(val payload: Payload)
 
 @Component
 class OrderEventConsumer(private val workflowClient: WorkflowClient) {
@@ -94,7 +64,6 @@ class OrderEventConsumer(private val workflowClient: WorkflowClient) {
                 WorkflowClient.start(workflow::start, deserializedPayload)
             } catch (exc: WorkflowExecutionAlreadyStarted) { }
         }
-        println("Message received by consumer 1: $messages")
         ack.acknowledge()
     }
 }
