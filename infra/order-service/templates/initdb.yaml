@@ -60,7 +60,7 @@ spec:
                     reservation_id integer,
                     payment_id integer
                 );
-                create unique index concurrently if not exists owner_id_version_idx on orders (consumer_id, version)
+                create unique index concurrently if not exists owner_id_version_idx on orders (consumer_id, version);
                 create table if not exists consumer_order_outbox_event (
                     order_id uuid primary key,
                     payload  jsonb not null
