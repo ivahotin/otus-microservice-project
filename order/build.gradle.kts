@@ -16,17 +16,17 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jdbc:2.5.5")
-	implementation("org.springframework.boot:spring-boot-starter-jdbc:2.5.5")
-	implementation("org.springframework.boot:spring-boot-starter-web:2.5.5")
-	implementation("org.springframework.boot:spring-boot-starter-json:2.5.5")
-	implementation("org.springframework.boot:spring-boot-starter-actuator:2.5.5")
-	implementation("io.micrometer:micrometer-registry-prometheus:1.7.4")
+	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+	implementation("org.springframework.boot:spring-boot-starter-jdbc")
+	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-json")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("io.micrometer:micrometer-registry-prometheus:1.7.5")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	runtimeOnly("org.postgresql:postgresql:42.2.24.jre7")
-	testImplementation("org.springframework.boot:spring-boot-starter-test:2.5.5")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 tasks.withType<KotlinCompile> {
