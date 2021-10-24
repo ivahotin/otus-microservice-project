@@ -1,0 +1,24 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: otus-order-service
+spec:
+  type: ExternalName
+  externalName: otus-order-service.order-service.svc.cluster.local
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+spec:
+  rules:
+    - host: arch.homework
+      http:
+        paths:
+          - path: /orders
+            pathType: Prefix
+            backend:
+              service:
+                name: otus-order-service
+                port:
+                  number: 80
