@@ -6,6 +6,14 @@ spec:
   type: ExternalName
   externalName: otus-order-service.order-service.svc.cluster.local
 ---
+kind: Service
+apiVersion: v1
+metadata:
+  name: otus-delivery-service
+spec:
+  type: ExternalName
+  externalName: otus-delivery-service.delivery-service.svc.cluster.local
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -20,5 +28,12 @@ spec:
             backend:
               service:
                 name: otus-order-service
+                port:
+                  number: 80
+          - path: /deliveries
+            pathType: Prefix
+            backend:
+              service:
+                name: otus-delivery-service
                 port:
                   number: 80
