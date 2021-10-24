@@ -1,6 +1,6 @@
 package com.example.billing
 
 sealed interface PaymentOperationResult
-object PaymentWasMadeBefore: PaymentOperationResult
+data class PaymentWasMadeBefore(val transactionId: Long): PaymentOperationResult
 object InsufficientAmount: PaymentOperationResult, Throwable()
-object PaymentMade: PaymentOperationResult
+data class PaymentMade(val transactionId: Long): PaymentOperationResult

@@ -12,4 +12,4 @@ create table if not exists transactions (
     is_cancelled boolean not null default false
 );
 
-create unique index concurrently if not exists idempotency_key_idx on transactions using btree (idempotency_key) where is_cancelled = false;
+create unique index concurrently if not exists idempotency_key_idx on transactions using btree (idempotency_key);

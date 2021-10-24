@@ -15,7 +15,7 @@ interface OrderActivities {
     fun declineOrder(orderId: UUID)
 
     @ActivityMethod
-    fun reserveItems(orderId: UUID, items: List<Item>): Long
+    fun reserveItems(consumerId: UUID, orderId: UUID, items: List<Item>): Long
     @ActivityMethod
     fun cancelReservation(reservationId: Long)
 
@@ -25,8 +25,8 @@ interface OrderActivities {
     fun cancelDelivery(deliveryId: Long)
 
     @ActivityMethod
-    fun makePayment(consumerId: UUID, orderId: UUID, amount: Long)
+    fun makePayment(consumerId: UUID, orderId: UUID, items: List<Item>): Long
 
     @ActivityMethod
-    fun confirmOrder(orderId: UUID)
+    fun confirmOrder(orderId: UUID, delivery: Long, paymentId: Long, reservationId: Long)
 }

@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Repository
 
-private const val updateStatement = "insert into deliveries (idempotency_key, type, city, delivery_datetime) values (?::uuid, ?, ?, ?) on conflict (idempotency_key) do nothing"
+private const val updateStatement = "insert into deliveries (idempotency_key, type, city, delivery_datetime, is_cancelled) values (?::uuid, ?, ?, ?, false) on conflict (idempotency_key) do nothing"
 private const val getDeliveryByIdStatement = "select id, idempotency_key, type, city, delivery_datetime, is_cancelled from deliveries where id = ?"
 private const val cancelStatement = "update deliveries set is_cancelled = true where id = ?"
 

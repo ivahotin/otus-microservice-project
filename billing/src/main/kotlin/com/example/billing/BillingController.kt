@@ -5,7 +5,7 @@ import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class BillingController(private val billingRepository: BillingRepository) {
 
-    @PutMapping("/payments/credits")
+    @PostMapping("/payments/credits")
     fun credit(
         @RequestHeader("x-user-id") userId: UUID,
         @RequestHeader("idempotency-key") idempotencyKey: String,
@@ -29,21 +29,21 @@ class BillingController(private val billingRepository: BillingRepository) {
         }
 
         return when (operationResult) {
-            is PaymentMade -> ResponseEntity.ok().build<Any>()
-            is PaymentWasMadeBefore -> ResponseEntity.status(HttpStatus.CONFLICT).build<Any?>()
+            is PaymentMade -> ResponseEntity.ok(TransactionResponse(operationResult.transactionId))
+            is PaymentWasMadeBefore -> ResponseEntity.ok(TransactionResponse(operationResult.transactionId))
             is InsufficientAmount -> ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build<Any?>()
         }
     }
 
-    @PutMapping("/payments/debits")
+    @PostMapping("/payments/debits")
     fun debit(
         @RequestHeader("x-user-id") userId: UUID,
         @RequestHeader("idempotency-key") idempotencyKey: String,
         @RequestBody payment: PaymentRequest
     ): ResponseEntity<*> {
-        return when (billingRepository.debit(idempotencyKey, userId, payment.amount)) {
-            is PaymentMade -> ResponseEntity.ok().build<Any?>()
-            is PaymentWasMadeBefore -> ResponseEntity.status(HttpStatus.CONFLICT).build<Any?>()
+        return when (val res = billingRepository.debit(idempotencyKey, userId, payment.amount)) {
+            is PaymentMade -> ResponseEntity.ok(TransactionResponse(res.transactionId))
+            is PaymentWasMadeBefore -> ResponseEntity.ok(TransactionResponse(res.transactionId))
             else -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build<Any?>()
         }
     }

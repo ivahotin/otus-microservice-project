@@ -31,7 +31,6 @@ class InventoryRepository(private val jdbcTemplate: JdbcTemplate): InventoryStor
         it.registerModule(JavaTimeModule())
         it.registerKotlinModule()
     }
-    private val itemsTypeReference = object : TypeReference<List<Item>>() {}
     private val reservationItemsTypeReference = object : TypeReference<List<ReservationItem>>() {}
 
     override fun findItems(term: String, offsetId: Long?, limit: Int): List<Item> {
