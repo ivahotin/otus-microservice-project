@@ -1,5 +1,39 @@
 # Сервис заказов товаров онлайн.
 
+## Установка
+
+Установка `temporal`
+```
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm install temporal-storage -f infra/temporal-storage/values.yaml bitnami/postgresql
+kubectl create ns temporalio
+helm upgrade --install -n temporalio -f infra/temporal/values.yaml temporalio infra/temporal/.
+```
+
+Установка `order-service`
+```
+kubectl create ns order-service
+helm upgrade --install -n order-service -f infra/order-service/values.yaml order-service infra/order-service/.
+```
+
+Установка `billing-service`
+```
+kubectl create ns billing-service
+helm upgrade --install -n billing-service -f infra/billing-service/values.yaml billing-service infra/billing-service/.
+```
+
+Установка `delivery-service`
+```
+kubectl create ns delivery-service
+helm upgrade --install -n delivery-service -f infra/delivery-service/values.yaml delivery-service infra/delivery-service/.
+```
+
+Установка `inventory-service`
+```
+kubectl create ns inventory-service
+helm upgrade --install -n inventory-service -f infra/inventory-service/values.yaml inventory-service infra/inventory-service/.
+```
+
 ## Пользовательские истории
 
 * Регистрация пользователя

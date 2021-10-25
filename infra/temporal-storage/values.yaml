@@ -1,0 +1,19 @@
+postgresql:
+  enabled: true
+  postgresqlUsername: postgres
+  postgresqlPassword: postgres
+  postgresqlDatabase: temporal_db
+  fullnameOverride: "temporal-db"
+  service:
+    port: "5432"
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+  resources:
+    requests:
+      cpu: 500m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

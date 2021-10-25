@@ -1,0 +1,441 @@
+nameOverride: ""
+fullnameOverride: ""
+
+# Chart debug mode
+# (eg. disable helm hook delete policy)
+debug: false
+
+server:
+  enabled: true
+  sidecarContainers:
+  image:
+    repository: temporalio/server
+    tag: 1.12.2
+    pullPolicy: IfNotPresent
+
+  # Global default settings (can be overridden per service)
+  replicaCount: 1
+  metrics:
+    # Annotate pods directly with Prometheus annotations.
+    # Use this if you installed Prometheus from a Helm chart.
+    annotations:
+      enabled: true
+    # Enable Prometheus ServiceMonitor
+    # Use this if you installed the Prometheus Operator (https://github.com/coreos/prometheus-operator).
+    serviceMonitor:
+      enabled: false
+      interval: 30s
+      # Set additional lables to all the ServiceMonitor resources
+      additionalLabels: {}
+      #  label1: value1
+      #  label2: value2
+      # Set Prometheus metric_relabel_configs via ServiceMonitor
+      # Use metricRelabelings to adjust metric and label names as needed
+      metricRelabelings: []
+      # - action: replace
+      #   sourceLabels:
+      #   - exported_namespace
+      #   targetLabel: temporal_namespace
+      # - action: replace
+      #   regex: service_errors_(.+)
+      #   replacement: ${1}
+      #   sourceLabels:
+      #   - __name__
+      #   targetLabel: temporal_error_kind
+      # - action: replace
+      #   regex: service_errors_.+
+      #   replacement: temporal_service_errors
+      #   sourceLabels:
+      #   - __name__
+      #   targetLabel: __name__
+    prometheus:
+      timerType: histogram
+  podAnnotations: {}
+  resources:
+    {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  additionalVolumes: []
+  additionalVolumeMounts: []
+
+  config:
+    logLevel: "debug,info"
+
+    # IMPORTANT: This value cannot be changed, once it's set.
+    numHistoryShards: 512
+
+    persistence:
+      defaultStore: default
+      additionalStores: {}
+
+      default:
+        driver: "sql"
+
+        cassandra:
+          hosts: []
+          # port: 9042
+          keyspace: "temporal"
+          user: "user"
+          password: "password"
+          existingSecret: ""
+          replicationFactor: 1
+          consistency:
+            default:
+              consistency: "local_quorum"
+              serialConsistency: "local_serial"
+          # datacenter: "us-east-1a"
+          # maxQPS: 1000
+          # maxConns: 2
+
+        sql:
+          driver: "postgres"
+          host: "temporal-storage-postgresql.default.svc.cluster.local"
+          port: 5432
+          database: "temporal_db"
+          user: "temporal"
+          password: "temporal"
+          existingSecret: ""
+          secretName: ""
+          maxConns: 20
+          maxConnLifetime: "1h"
+            # connectAttributes:
+          # tx_isolation: 'READ-COMMITTED'
+
+      visibility:
+        driver: "sql"
+
+        cassandra:
+          hosts: []
+          # port: 9042
+          keyspace: "temporal_visibility"
+          user: "user"
+          password: "password"
+          existingSecret: ""
+          # datacenter: "us-east-1a"
+          # maxQPS: 1000
+          # maxConns: 2
+          replicationFactor: 1
+          consistency:
+            default:
+              consistency: "local_quorum"
+              serialConsistency: "local_serial"
+
+        sql:
+          driver: "postgres"
+          host: "temporal-storage-postgresql.default.svc.cluster.local"
+          port: 5432
+          database: "temporal_visibility"
+          user: "postgres"
+          password: "postgres"
+          existingSecret: ""
+          secretName: ""
+          maxConns: 20
+          maxConnLifetime: "1h"
+          # connectAttributes:
+          #   tx_isolation: 'READ-COMMITTED'
+
+  frontend:
+    # replicaCount: 1
+    service:
+      annotations: {} # Evaluated as template
+      type: ClusterIP
+      port: 7233
+    metrics:
+      annotations:
+        enabled: true
+      serviceMonitor: {}
+      # enabled: false
+      prometheus: {}
+      # timerType: histogram
+    podAnnotations: {}
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  history:
+    # replicaCount: 1
+    service:
+      # type: ClusterIP
+      port: 7234
+    metrics:
+      annotations:
+        enabled: true
+      serviceMonitor: {}
+      # enabled: false
+      prometheus: {}
+      # timerType: histogram
+    podAnnotations: {}
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  matching:
+    # replicaCount: 1
+    service:
+      # type: ClusterIP
+      port: 7235
+    metrics:
+      annotations:
+        enabled: false
+      serviceMonitor: {}
+      # enabled: false
+      prometheus: {}
+      # timerType: histogram
+    podAnnotations: {}
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  worker:
+    # replicaCount: 1
+    service:
+      # type: ClusterIP
+      port: 7239
+    metrics:
+      annotations:
+        enabled: true
+      serviceMonitor: {}
+      # enabled: false
+      prometheus: {}
+      # timerType: histogram
+    podAnnotations: {}
+    resources: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+admintools:
+  enabled: true
+  image:
+    repository: temporalio/admin-tools
+    tag: 1.12.2
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 22
+    annotations: {}
+
+web:
+  enabled: true
+  config:
+    # server/config.yml file content
+    auth:
+      enabled: false
+    routing:
+      default_to_namespace: # internal use only
+      issue_report_link: https://github.com/temporalio/web/issues/new/choose # set this field if you need to direct people to internal support forums
+
+
+  replicaCount: 1
+
+  image:
+    repository: temporalio/web
+    tag: 1.12.0
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 8088
+    annotations: {}
+    # loadBalancerIP:
+
+  ingress:
+    enabled: false
+    annotations: {}
+    # kubernetes.io/ingress.class: traefik
+    # ingress.kubernetes.io/ssl-redirect: "false"
+    # traefik.frontend.rule.type: PathPrefix
+    hosts:
+      - "/"
+      # - "domain.com/xyz"
+      # - "domain.com"
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  podAnnotations: {}
+
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+schema:
+  setup:
+    enabled: true
+    backoffLimit: 100
+  update:
+    enabled: true
+    backoffLimit: 100
+
+elasticsearch:
+  enabled: false
+  replicas: 3
+  persistence:
+    enabled: false
+  imageTag: 7.10.1
+  host: elasticsearch-master-headless
+  scheme: http
+  port: 9200
+  version: "v7"
+  logLevel: "error"
+  username: ""
+  password: ""
+  visibilityIndex: "temporal_visibility_v1_dev"
+
+prometheus:
+  enabled: false
+  nodeExporter:
+    enabled: false
+
+grafana:
+  enabled: false
+  replicas: 1
+  testFramework:
+    enabled: false
+  rbac:
+    create: false
+    pspEnabled: false
+    namespaced: true
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: 'default'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: TemporalMetrics
+          type: prometheus
+          url: http://{{ .Release.Name }}-prometheus-server
+          access: proxy
+          isDefault: true
+  dashboards:
+    default:
+      frontend-github:
+        url: https://raw.githubusercontent.com/temporalio/temporal-dashboards/master/dashboards/frontend.json
+        datasource: TemporalMetrics
+      temporal-github:
+        url: https://raw.githubusercontent.com/temporalio/temporal-dashboards/master/dashboards/temporal.json
+        datasource: TemporalMetrics
+      history-github:
+        url: https://raw.githubusercontent.com/temporalio/temporal-dashboards/master/dashboards/history.json
+        datasource: TemporalMetrics
+      matching-github:
+        url: https://raw.githubusercontent.com/temporalio/temporal-dashboards/master/dashboards/matching.json
+        datasource: TemporalMetrics
+      clusteroverview-github:
+        url: https://raw.githubusercontent.com/temporalio/temporal-dashboards/master/dashboards/10000.json
+        datasource: TemporalMetrics
+      common-github:
+        url: https://raw.githubusercontent.com/temporalio/temporal-dashboards/master/dashboards/common.json
+        datasource: TemporalMetrics
+
+cassandra:
+  enabled: false
+  persistence:
+    enabled: false
+  image:
+    repo: cassandra
+    tag: 3.11.3
+    pullPolicy: IfNotPresent
+  config:
+    cluster_size: 1
+    ports:
+      cql: 9042
+    num_tokens: 4
+    seed_size: 0
+  service:
+    type: ClusterIP
+  readinessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+mysql:
+  enabled: false
+  image:
+    debug: true
+  auth:
+    username: "temporal"
+    password: "temporal"
+    rootPassword: "rootPassword"
+  primary:
+    startupProbe:
+      enabled: false
+    livenessProbe:
+      enabled: false
+    readinessProbe:
+      enabled: false
+    resources:
+      requests:
+        cpu: 500m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1024Mi
+    persistence:
+      enable: false
+#      size: 4Gi
+    secondary:
+      persistence:
+        enabled: false
+
+postgresql:
+  enabled: false
+  postgresqlUsername: postgres
+  postgresqlPassword: postgres
+  postgresqlDatabase: temporal_db
+  fullnameOverride: "temporal-db"
+  service:
+    port: "5432"
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+  resources:
+    requests:
+      cpu: 500m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
