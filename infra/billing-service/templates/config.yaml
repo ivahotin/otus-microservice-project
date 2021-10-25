@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "billing-service-secret"
+type: Opaque
+data:
+  BILLING_DB_URL: {{ printf "jdbc:postgresql://%s:%s/%s" (include "postgresql.fullname" .) .Values.postgresql.service.port .Values.postgresql.postgresqlDatabase  | b64enc | quote }}
+  BILLING_DB_USERNAME: {{ .Values.postgresql.postgresqlUsername | b64enc | quote }}
+  BILLING_DB_PASSWORD: {{ .Values.postgresql.postgresqlPassword | b64enc | quote }}

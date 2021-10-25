@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/billing" />
+        <option name="gradleJvm" value="openjdk-16" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/billing" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/delivery" />
+        <option name="gradleJvm" value="openjdk-16" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/delivery" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/inventory" />
+        <option name="gradleJvm" value="openjdk-16" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/inventory" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/orchestrator" />
+        <option name="gradleJvm" value="openjdk-16" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/orchestrator" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/order" />
+        <option name="gradleJvm" value="openjdk-16" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/order" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
