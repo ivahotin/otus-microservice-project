@@ -4,9 +4,9 @@
 
 Установка `temporal`
 ```
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install temporal-storage -f infra/temporal-storage/values.yaml bitnami/postgresql
 kubectl create ns temporalio
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm install -n temporalio temporal-storage -f infra/temporal-storage/values.yaml bitnami/postgresql --version=9.2.1
 helm upgrade --install -n temporalio -f infra/temporal/values.yaml temporalio infra/temporal/.
 ```
 
