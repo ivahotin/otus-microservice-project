@@ -2,15 +2,15 @@
 
 ## Распределенная транзакция
 
-Для осуществления распределенной транзакции используются реализация `Orchestration-based saga`. В качестве оркестратора 
-используется [Temporal.io](https://temporal.io/).
+Для осуществления распределенной транзакции используются реализация паттерна `Orchestration-based saga`. 
+В качестве оркестратора используется [Temporal.io](https://temporal.io/).
 
 ![mermaid-diagram-20200526103254](docs/README.assets/saga.png)
 
 Таблица транзакций
 
 | Step  | Service     | Transaction      | Compensation transaction          |
-| :---  |    :----:   |   :----:         |                     ---:          |
+| :---  |    :----:   |   :----:         |                     :----:          |
 | 1     | Order service       | POST /orders/ | PUT /orders/declines/{orderId}    | 
 | 2     | Inventory service        | POST /items/reservations         | POST /items/reservations/cancellations/{reservationId} |
 | 3     | Delivery service         | POST /deliveries | POST /deliveries/{deliveryId}/cancellation |
