@@ -92,7 +92,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: "orchestrator-config"
-                    key: INVENTORY_PORT
+                  key: INVENTORY_PORT
             - name: DELIVERY_URL
               valueFrom:
                 configMapKeyRef:

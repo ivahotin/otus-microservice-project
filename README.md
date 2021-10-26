@@ -10,6 +10,7 @@ helm upgrade --install -n kafka cp confluentinc/cp-helm-charts -f infra/kafka/cp
 // Подождать пока все поды поднимутся ~5-6 минут
 watch -n 5 kubectl get pods -n kafka
 kubectl apply -f infra/kafka/debezium_connector.yaml -n kafka
+curl -X POST http://$(minikube ip):30500/connectors -H 'Content-Type: application/json' -d @debezium/connectors/prod/order-source-connector.json
 ```
 
 Установка `temporal`
@@ -47,7 +48,18 @@ helm upgrade --install -n inventory-service -f infra/inventory-service/values.ya
 Установка `orchestrator`
 ```
 kubectl create ns orchestrator
-helm upgrade --install -n orchestrator -f infra/orchestrator/values.yaml orchestrator infra/orchestrator/
+helm upgrade --install -n orchestrator -f infra/orchestrator/values.yaml orchestrator infra/orchestrator/.
+```
+
+Установка `api-gateway`
+```
+kubectl apply -f infra/api-gateway/ingress.yaml
+```
+
+## Тестирование
+
+```
+newman run --verbose integration_tests/saga_collections.json
 ```
 
 ## Пользовательские истории
