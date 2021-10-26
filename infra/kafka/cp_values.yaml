@@ -1,0 +1,95 @@
+cp-zookeeper:
+  enabled: true
+  servers: 3
+  image: confluentinc/cp-zookeeper
+  imageTag: 5.5.0
+  imagePullSecrets:
+  heapOptions: "-Xms512M -Xmx512M"
+  persistence:
+    enabled: true
+    dataDirSize: 128Mi
+    dataLogDirSize: 128Mi
+  resources: {}
+  prometheus:
+    jmx:
+      enabled: false
+
+cp-kafka:
+  enabled: true
+  brokers: 3
+  image: confluentinc/cp-enterprise-kafka
+  imageTag: 5.5.0
+  imagePullSecrets:
+  heapOptions: "-Xms512M -Xmx512M"
+  persistence:
+    enabled: true
+    size: 128Mi
+    disksPerBroker: 1
+  resources: {}
+  prometheus:
+    jmx:
+      enabled: false
+
+cp-schema-registry:
+  enabled: true
+  image: confluentinc/cp-schema-registry
+  imageTag: 5.5.0
+  imagePullSecrets:
+  heapOptions: "-Xms512M -Xmx512M"
+  resources: {}
+  prometheus:
+    jmx:
+      enabled: false
+
+cp-kafka-rest:
+  enabled: true
+  image: confluentinc/cp-kafka-rest
+  imageTag: 5.5.0
+  imagePullSecrets:
+  heapOptions: "-Xms512M -Xmx512M"
+  resources: {}
+  prometheus:
+    jmx:
+      enabled: false
+
+cp-kafka-connect:
+  enabled: false
+  image: confluentinc/cp-kafka-connect
+  imageTag: 5.5.0
+  imagePullSecrets:
+  heapOptions: "-Xms512M -Xmx512M"
+  resources: {}
+  configurationOverrides:
+    "plugin.path": "/usr/share/java,/usr/share/confluent-hub-components"
+    "key.converter": "io.confluent.connect.avro.AvroConverter"
+    "value.converter": "io.confluent.connect.avro.AvroConverter"
+    "key.converter.schemas.enable": "false"
+    "value.converter.schemas.enable": "false"
+    "internal.key.converter": "org.apache.kafka.connect.json.JsonConverter"
+    "internal.value.converter": "org.apache.kafka.connect.json.JsonConverter"
+    "config.storage.replication.factor": "1"
+    "offset.storage.replication.factor": "1"
+    "status.storage.replication.factor": "1"
+  prometheus:
+    jmx:
+      enabled: false
+
+cp-ksql-server:
+  enabled: false
+  image: confluentinc/cp-ksqldb-server
+  imageTag: 5.5.0
+  imagePullSecrets:
+  heapOptions: "-Xms512M -Xmx512M"
+  ksql:
+    headless: false
+  prometheus:
+    jmx:
+      enabled: false
+
+cp-control-center:
+  enabled: false
+  image: confluentinc/cp-enterprise-control-center
+  imageTag: 5.5.0
+  imagePullSecrets:
+  heapOptions: "-Xms512M -Xmx512M"
+  resources: {}

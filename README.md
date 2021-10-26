@@ -2,6 +2,16 @@
 
 ## Установка
 
+Установка `kafka`
+```
+kubectl create ns kafka
+kubectl apply -f infra/kafka/pv.yaml -n kafka
+helm upgrade --install -n kafka cp confluentinc/cp-helm-charts -f infra/kafka/cp_values.yaml
+// Подождать пока все поды поднимутся ~5-6 минут
+watch -n 5 kubectl get pods -n kafka
+kubectl apply -f infra/kafka/debezium_connector.yaml -n kafka
+```
+
 Установка `temporal`
 ```
 kubectl create ns temporalio
@@ -32,6 +42,12 @@ helm upgrade --install -n delivery-service -f infra/delivery-service/values.yaml
 ```
 kubectl create ns inventory-service
 helm upgrade --install -n inventory-service -f infra/inventory-service/values.yaml inventory-service infra/inventory-service/.
+```
+
+Установка `orchestrator`
+```
+kubectl create ns orchestrator
+helm upgrade --install -n orchestrator -f infra/orchestrator/values.yaml orchestrator infra/orchestrator/
 ```
 
 ## Пользовательские истории

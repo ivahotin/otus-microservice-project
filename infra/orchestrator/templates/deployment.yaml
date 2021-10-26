@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "orchestrator.fullname" . }}
+  labels:
+    {{- include "orchestrator.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "orchestrator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "orchestrator.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "orchestrator.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: KAFKA_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: KAFKA_URL
+            - name: CONSUMER_GROUP_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: CONSUMER_GROUP_ID
+            - name: ORDER_EVENT_TOPIC
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: ORDER_EVENT_TOPIC
+            - name: ORDER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: ORDER_URL
+            - name: ORDER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: ORDER_PORT
+            - name: BILLING_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: BILLING_URL
+            - name: BILLING_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: BILLING_PORT
+            - name: INVENTORY_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: INVENTORY_URL
+            - name: INVENTORY_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                    key: INVENTORY_PORT
+            - name: DELIVERY_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: DELIVERY_URL
+            - name: DELIVERY_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: DELIVERY_PORT
+            - name: TEMPORAL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: TEMPORAL_HOST
+            - name: TEMPORAL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: TEMPORAL_PORT
+            - name: TEMPORAL_NAMESPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: "orchestrator-config"
+                  key: TEMPORAL_NAMESPACE
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

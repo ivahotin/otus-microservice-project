@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orchestrator-config
+data:
+  KAFKA_URL: "cp-cp-kafka.kafka.svc.cluster.local:9092"
+  CONSUMER_GROUP_ID: "order_saga"
+  ORDER_EVENT_TOPIC: "consumer_order_outbox_event"
+  ORDER_URL: "otus-order-service.order-service.svc.cluster.local"
+  ORDER_PORT: "80"
+  BILLING_URL: "otus-billing-service.billing-service.svc.cluster.local"
+  BILLING_PORT: "80"
+  INVENTORY_URL: "otus-inventory-service.inventory-service.svc.cluster.local"
+  INVENTORY_PORT: "80"
+  DELIVERY_URL: "otus-delivery-service.delivery-service.svc.cluster.local"
+  DELIVERY_PORT: "80"
+  TEMPORAL_HOST: "temporalio-frontend.temporalio.svc.cluster.local"
+  TEMPORAL_PORT: "7233"
+  TEMPORAL_NAMESPACE: "default"
