@@ -1,5 +1,47 @@
 # Сервис заказов товаров онлайн.
 
+## Распределенная транзакция
+
+Для осуществления распределенной транзакции используются реализация `Orchestration-based saga`. В качестве оркестратора 
+используется [Temporal.io](https://temporal.io/).
+
+![mermaid-diagram-20200526103254](docs/README.assets/saga.png)
+
+Таблица транзакций
+
+| Step  | Service     | Transaction      | Compensation transaction          |
+| :---  |    :----:   |   :----:         |                     ---:          |
+| 1     | Order service       | POST /orders/ | PUT /orders/declines/{orderId}    | 
+| 2     | Inventory service        | POST /items/reservations         | POST /items/reservations/cancellations/{reservationId} |
+| 3     | Delivery service         | POST /deliveries | POST /deliveries/{deliveryId}/cancellation |
+| 4     | Billing service          | POST /payments/credits | --- |
+| 5     | Order service            | PUT /orders/approvals  | --- |
+
+Транзакция №4 является поворотной и не имеет компенсирующей транзакции.
+
+```kotlin
+override fun start(event: CreatedOrderEvent) {
+        val sagaOptions = Saga.Options.Builder().setParallelCompensation(true).build()
+        val saga = Saga(sagaOptions)
+        try {
+            activities.placeOrder()
+            saga.addCompensation(activities::declineOrder, event.orderId)
+
+            val reservationId = activities.reserveItems(event.consumerId, event.orderId, event.items)
+            saga.addCompensation(activities::cancelReservation, reservationId)
+
+            val deliveryId = activities.reserveDelivery(event.orderId, event.delivery)
+            saga.addCompensation(activities::cancelDelivery, deliveryId)
+
+            val paymentId = activities.makePayment(event.consumerId, event.orderId, event.items)
+            activities.confirmOrder(event.orderId, deliveryId, paymentId, reservationId)
+        } catch (exc: ActivityFailure) {
+            saga.compensate()
+            throw exc
+        }
+    }
+```
+
 ## Установка
 
 Установка `kafka`
