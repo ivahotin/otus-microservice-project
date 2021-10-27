@@ -141,6 +141,48 @@ spec:
               value: "temporal_visibility"
 
 ---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: temporal-namespace-setup
+  labels:
+    app.kubernetes.io/name: temporal
+    helm.sh/chart: temporal-0.12.3
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: 1.12.3
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: temporal
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  backoffLimit: 200
+  template:
+    metadata:
+      name: temporal-namespace-setup
+      labels:
+        app.kubernetes.io/name: temporal
+        helm.sh/chart: temporal-0.12.3
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/version: 1.12.3
+        app.kubernetes.io/component: database
+        app.kubernetes.io/part-of: temporal
+    spec:
+      restartPolicy: "OnFailure"
+      initContainers:
+        []
+      containers:
+        - name: order-namespace
+          image: "temporalio/admin-tools:1.12.2"
+          imagePullPolicy: IfNotPresent
+          command: ["tctl", "--namespace", "order", "namespace", "re"]
+          env:
+            - name: TEMPORAL_CLI_ADDRESS
+              value: "temporalio-frontend.temporalio.svc.cluster.local:7233"
+---
 {{- end }}
 {{- if or $.Values.elasticsearch.enabled $.Values.elasticsearch.external }}
 apiVersion: batch/v1

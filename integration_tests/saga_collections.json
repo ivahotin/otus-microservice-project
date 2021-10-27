@@ -60,6 +60,18 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let uuid = require('uuid');",
+							"let myUUID = uuid.v4();",
+							"console.log(myUUID);",
+							"pm.collectionVariables.set(\"idempotencyKey\", myUUID);"
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
@@ -72,7 +84,7 @@
 					},
 					{
 						"key": "idempotency-key",
-						"value": "56613336-7de6-49e1-8bf8-2b68d5613f1f",
+						"value": "{{idempotencyKey}}",
 						"type": "text"
 					}
 				],
@@ -100,6 +112,46 @@
 			"response": []
 		},
 		{
+			"name": "Get existing order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Should return list of orders\", function() {",
+							"    pm.response.to.have.status(200);",
+							"",
+							"    let lastVersion = parseInt(pm.response.headers.get(\"ETag\").replace(/^\"(.*)\"$/, '$1')) + 1;",
+							"    pm.collectionVariables.set(\"lastVersion\", lastVersion);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-user-id",
+						"value": "{{consumerId}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://{{baseUrl}}/orders",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Place order",
 			"event": [
 				{
@@ -110,8 +162,9 @@
 							"    pm.response.to.have.status(200);",
 							"    let jsonData = pm.response.json();",
 							"    pm.collectionVariables.set(\"orderId\", jsonData.orderId);",
-							"    setTimeout(() => {}, 5000); ",
-							"})"
+							"});",
+							"",
+							"setTimeout(() => {}, 10000);"
 						],
 						"type": "text/javascript"
 					}
@@ -127,7 +180,7 @@
 					},
 					{
 						"key": "If-Match",
-						"value": "1",
+						"value": "{{lastVersion}}",
 						"type": "text"
 					}
 				],
@@ -322,6 +375,46 @@
 			"response": []
 		},
 		{
+			"name": "Get existing orders",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Should return list of orders\", function() {",
+							"    pm.response.to.have.status(200);",
+							"",
+							"    let lastVersion = parseInt(pm.response.headers.get(\"ETag\").replace(/^\"(.*)\"$/, '$1')) + 1;",
+							"    pm.collectionVariables.set(\"lastVersion\", lastVersion);",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-user-id",
+						"value": "{{consumerId}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://{{baseUrl}}/orders",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Place one more order",
 			"event": [
 				{
@@ -332,8 +425,9 @@
 							"    pm.response.to.have.status(200);",
 							"    let jsonData = pm.response.json();",
 							"    pm.collectionVariables.set(\"failedOrderId\", jsonData.orderId);",
-							"    setTimeout(() => {}, 5000); ",
-							"});"
+							"});",
+							"",
+							"setTimeout(() => {}, 10000); "
 						],
 						"type": "text/javascript"
 					}
@@ -349,7 +443,7 @@
 					},
 					{
 						"key": "If-Match",
-						"value": "2",
+						"value": "{{lastVersion}}",
 						"type": "text"
 					}
 				],
@@ -425,7 +519,8 @@
 							"pm.test(\"Check reservation\", function() {",
 							"    pm.response.to.have.status(200);",
 							"    let jsonData = pm.response.json();",
-							"    let isCancelled = jsonData.filter(reservation => reservation.isCancelled).length > 0;",
+							"    let orderId = pm.collectionVariables.get(\"failedOrderId\");",
+							"    let isCancelled = jsonData.filter(reservation => reservation.idempotencyKey == orderId).length > 0;",
 							"",
 							"    pm.expect(isCancelled).to.eql(true);",
 							"});"
@@ -509,6 +604,14 @@
 		},
 		{
 			"key": "failedOrderId",
+			"value": ""
+		},
+		{
+			"key": "idempotencyKey",
+			"value": ""
+		},
+		{
+			"key": "lastVersion",
 			"value": ""
 		}
 	]

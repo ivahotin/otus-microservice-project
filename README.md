@@ -52,7 +52,6 @@ helm upgrade --install -n kafka cp confluentinc/cp-helm-charts -f infra/kafka/cp
 // Подождать пока все поды поднимутся ~5-6 минут
 watch -n 5 kubectl get pods -n kafka
 kubectl apply -f infra/kafka/debezium_connector.yaml -n kafka
-curl -X POST http://$(minikube ip):30500/connectors -H 'Content-Type: application/json' -d @debezium/connectors/prod/order-source-connector.json
 ```
 
 Установка `temporal`
@@ -60,6 +59,8 @@ curl -X POST http://$(minikube ip):30500/connectors -H 'Content-Type: applicatio
 kubectl create ns temporalio
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm install -n temporalio temporal-storage -f infra/temporal-storage/values.yaml bitnami/postgresql --version=9.2.1
+// Подождать пару минут пока поднимется хранилище для temporal io
+watch -n 5 kubectl get pods -n temporalio
 helm upgrade --install -n temporalio -f infra/temporal/values.yaml temporalio infra/temporal/.
 ```
 
@@ -96,6 +97,11 @@ helm upgrade --install -n orchestrator -f infra/orchestrator/values.yaml orchest
 Установка `api-gateway`
 ```
 kubectl apply -f infra/api-gateway/ingress.yaml
+```
+
+Добавить коннектор
+```
+curl -X POST http://$(minikube ip):30500/connectors -H 'Content-Type: application/json' -d @debezium/connectors/prod/order-source-connector.json
 ```
 
 ## Тестирование
