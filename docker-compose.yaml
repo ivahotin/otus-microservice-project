@@ -183,6 +183,30 @@ services:
       - online
     ports:
       - 8088:8088
+  user_db:
+    image: postgres
+    container_name: user-db
+    volumes:
+      - ./user/migrations/create_user_tables.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_DB=user_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    env_file:
+      - ./user/.local.env
+    networks:
+      - online
+    ports:
+      - "5436:5432"
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+  redis:
+    image: "redis:alpine"
+    container_name: session-storage
+    ports:
+      - "6379:6379"
 
 networks:
   online:
