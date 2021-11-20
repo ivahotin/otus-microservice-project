@@ -44,6 +44,15 @@ override fun start(event: CreatedOrderEvent) {
 
 ## Установка
 
+Установка `prometheus`
+```
+kubectl create ns monitoring
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm upgrade --install -n monitoring -f infra/prometheus/prometheus.yaml prometheus prometheus-community/kube-prometheus-stack --atomic
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm upgrade --install -f infra/prometheus/nginx-ingress.yaml nginx ingress-nginx/ingress-nginx --atomic
+```
+
 Установка `kafka`
 ```
 kubectl create ns kafka
@@ -68,6 +77,12 @@ helm upgrade --install -n temporalio -f infra/temporal/values.yaml temporalio in
 ```
 kubectl create ns order-service
 helm upgrade --install -n order-service -f infra/order-service/values.yaml order-service infra/order-service/.
+```
+
+Установка `user-service`
+```
+kubectl create ns user-service
+helm upgrade --install -n user-service -f infra/user-service/values.yaml user-service infra/user-service/.
 ```
 
 Установка `billing-service`
@@ -102,6 +117,8 @@ kubectl apply -f infra/api-gateway/ingress.yaml
 Добавить коннектор
 ```
 curl -X POST http://$(minikube ip):30500/connectors -H 'Content-Type: application/json' -d @debezium/connectors/prod/order-source-connector.json
+curl -X POST http://$(minikube ip):30500/connectors -H 'Content-Type: application/json' -d @debezium/connectors/prod/user-source-connector.json
+curl -X POST http://$(minikube ip):30500/connectors -H 'Content-Type: application/json' -d @debezium/connectors/prod/billing-sink-connector.json
 ```
 
 ## Тестирование
@@ -185,6 +202,16 @@ newman run --verbose integration_tests/saga_collections.json
 ## Контракты
 
 [Описание контрактов](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/ivahotin/otus-microservice-project/master/docs/contracts/restapi.yaml)
+
+## Мониторинг
+
+Проброс порта к Grafana
+
+`kubectl port-forward -n monitoring svc/prometheus-grafana 9000:80`
+
+После этого Grafana будет доступна на `localhost:9000`.
+
+Логин/Пароль для доступа `admin/prom-operator`
 
 ## Альтернативы
 

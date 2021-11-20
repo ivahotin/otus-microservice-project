@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-service-config
+data:
+  REDIS_HOST: "user-service-redis-master.user-service.svc.cluster.local"
+  REDIS_PORT: "6379"

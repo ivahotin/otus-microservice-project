@@ -30,11 +30,26 @@ spec:
   type: ExternalName
   externalName: otus-billing-service.billing-service.svc.cluster.local
 ---
+kind: Service
+apiVersion: v1
+metadata:
+  name: otus-user-service
+spec:
+  type: ExternalName
+  externalName: otus-user-service.user-service.svc.cluster.local
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: app-ingress
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9113"
+    prometheus.io/scheme: http
+    nginx.ingress.kubernetes.io/auth-url: http://otus-user-service.user-service.svc.cluster.local/auth
+    nginx.ingress.kubernetes.io/auth-response-headers: x-user-id
 spec:
+  ingressClassName: nginx
   rules:
     - host: arch.homework
       http:
@@ -65,5 +80,27 @@ spec:
             backend:
               service:
                 name: otus-billing-service
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: auth-service
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9113"
+    prometheus.io/scheme: http
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: arch.homework
+      http:
+        paths:
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: otus-user-service
                 port:
                   number: 80

@@ -1,0 +1,26 @@
+{
+  "name": "billing-account-connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "connection.url": "jdbc:postgresql://billing-db.billing-service:5432/billing_db",
+    "connection.user": "postgres",
+    "connection.password": "postgres",
+    "topics": "users",
+    "table.name.format": "billing_accounts",
+    "pk.fields": "consumer_id",
+    "pk.mode": "record_value",
+    "auto.create": "false",
+    "auto.evolve": "false",
+    "insert.mode": "upsert",
+    "delete.enabled": "false",
+    "fields.whitelist": "consumer_id",
+    "transforms": "unwrap,only_fields,RenameField",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.only_fields.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+    "transforms.only_fields.whitelist": "id",
+    "transforms.RenameField.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+    "transforms.RenameField.renames": "id:consumer_id"
+  }
+}
