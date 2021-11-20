@@ -49,8 +49,6 @@ override fun start(event: CreatedOrderEvent) {
 kubectl create ns monitoring
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm upgrade --install -n monitoring -f infra/prometheus/prometheus.yaml prometheus prometheus-community/kube-prometheus-stack --atomic
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-helm upgrade --install -f infra/prometheus/nginx-ingress.yaml nginx ingress-nginx/ingress-nginx --atomic
 ```
 
 Установка `kafka`
@@ -111,6 +109,8 @@ helm upgrade --install -n orchestrator -f infra/orchestrator/values.yaml orchest
 
 Установка `api-gateway`
 ```
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm upgrade --install -f infra/prometheus/nginx-ingress.yaml nginx ingress-nginx/ingress-nginx --atomic
 kubectl apply -f infra/api-gateway/ingress.yaml
 ```
 

@@ -35,7 +35,7 @@ class OrderController(
         val clientVersion = lastVersion ?: 0
 
         val command = CreateOrderCommand(
-            consumerId = createOrderRequest.consumerId,
+            consumerId = userId,
             version = clientVersion,
             delivery = createOrderRequest.delivery,
             items = createOrderRequest.items

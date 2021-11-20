@@ -31,7 +31,7 @@ cp-kafka:
       enabled: false
 
 cp-schema-registry:
-  enabled: true
+  enabled: false
   image: confluentinc/cp-schema-registry
   imageTag: 5.5.0
   imagePullSecrets:
@@ -42,7 +42,7 @@ cp-schema-registry:
       enabled: false
 
 cp-kafka-rest:
-  enabled: true
+  enabled: false
   image: confluentinc/cp-kafka-rest
   imageTag: 5.5.0
   imagePullSecrets:
