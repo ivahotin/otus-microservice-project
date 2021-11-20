@@ -24,7 +24,8 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-	implementation("io.micrometer:micrometer-registry-prometheus:1.7.4")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("io.micrometer:micrometer-registry-prometheus:1.7.5")
 	runtimeOnly("org.postgresql:postgresql:42.2.24.jre7")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
