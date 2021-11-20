@@ -1,17 +1,18 @@
 package com.example.user
 
 import com.example.user.dto.RegisterDto
-import org.springframework.http.HttpHeaders
+import javax.servlet.http.Cookie
+import javax.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RestController
 
-@Controller
+@RestController
 class UserController(
     private val userRepository: UserRepository,
     private val sessionStorage: SessionStorage
@@ -36,7 +37,7 @@ class UserController(
     }
 
     @PostMapping("/auth/login")
-    fun login(@RequestBody request: RegisterDto): ResponseEntity<*> {
+    fun login(@RequestBody request: RegisterDto, response: HttpServletResponse): ResponseEntity<*> {
         val username = request.username
         val user = userRepository.getUserByUsername(username)
         if (user == null || !bCryptPasswordEncoder.matches(request.password, user.password)) {
@@ -46,11 +47,12 @@ class UserController(
         }
 
         val sessionId = sessionStorage.createSession(user.id!!)
-        val headers = HttpHeaders()
-        headers.add("Set-Cookie","session_id=$sessionId; Path=/; Secure; HttpOnly");
+        val cookie = Cookie("session_id", sessionId)
+        cookie.isHttpOnly = true
+        cookie.secure = false
+        response.addCookie(cookie)
         return ResponseEntity
             .status(HttpStatus.OK)
-            .headers(headers)
             .build<Any>()
     }
 
