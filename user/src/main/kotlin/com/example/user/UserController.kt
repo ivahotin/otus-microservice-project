@@ -50,6 +50,7 @@ class UserController(
         val cookie = Cookie("session_id", sessionId)
         cookie.isHttpOnly = true
         cookie.secure = false
+        cookie.path = "/"
         response.addCookie(cookie)
         return ResponseEntity
             .status(HttpStatus.OK)
