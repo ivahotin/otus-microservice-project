@@ -1,10 +1,115 @@
 {
 	"info": {
-		"_postman_id": "4480605c-8946-478d-a6b6-55391d8cac66",
+		"_postman_id": "3343107a-a852-4c97-8a5e-ff2ea6648633",
 		"name": "Test saga",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
+		{
+			"name": "Register new consumer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Should register new user\", function() {",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let username = Math.random().toString(36).substring(2,7);",
+							"pm.collectionVariables.set(\"consumerLogin\", username)",
+							"let password = Math.random().toString(36).substring(2,7);",
+							"pm.collectionVariables.set(\"consumerPassword\", password)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"{{consumerLogin}}\",\n    \"password\": \"{{consumerPassword}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/auth/register",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login consumer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Consumer should login\", function() {",
+							"    pm.response.to.have.status(200);",
+							"",
+							"    let consumerSessionId = pm.cookies.get(\"session_id\");",
+							"    console.log(pm.response.cookies);",
+							"    console.log(consumerSessionId);",
+							"    pm.collectionVariables.set(\"consumerSessionId\", consumerSessionId);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"{{consumerLogin}}\",\n    \"password\": \"{{consumerPassword}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/auth/login",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
 		{
 			"name": "Add items",
 			"event": [
@@ -17,6 +122,17 @@
 							"    let jsonData = pm.response.json();",
 							"    pm.collectionVariables.set(\"itemId\", jsonData.itemId);",
 							"})"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let cookieJar = pm.cookies.jar();",
+							"let consumerSessionId = pm.collectionVariables.get(\"consumerSessionId\");",
+							"cookieJar.set(\"{{$baseUrl}}\", \"session_id\", consumerSessionId);"
 						],
 						"type": "text/javascript"
 					}
@@ -67,8 +183,11 @@
 						"exec": [
 							"let uuid = require('uuid');",
 							"let myUUID = uuid.v4();",
-							"console.log(myUUID);",
-							"pm.collectionVariables.set(\"idempotencyKey\", myUUID);"
+							"pm.collectionVariables.set(\"idempotencyKey\", myUUID);",
+							"",
+							"let cookieJar = pm.cookies.jar();",
+							"let consumerSessionId = pm.collectionVariables.get(\"consumerSessionId\");",
+							"cookieJar.set(\"{{$baseUrl}}\", \"session_id\", consumerSessionId);"
 						],
 						"type": "text/javascript"
 					}
@@ -77,11 +196,6 @@
 			"request": {
 				"method": "POST",
 				"header": [
-					{
-						"key": "x-user-id",
-						"value": "{{consumerId}}",
-						"type": "text"
-					},
 					{
 						"key": "idempotency-key",
 						"value": "{{idempotencyKey}}",
@@ -127,17 +241,22 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let cookieJar = pm.cookies.jar();",
+							"let consumerSessionId = pm.collectionVariables.get(\"consumerSessionId\");",
+							"cookieJar.set(\"{{$baseUrl}}\", \"session_id\", consumerSessionId);"
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
 				"method": "GET",
-				"header": [
-					{
-						"key": "x-user-id",
-						"value": "{{consumerId}}",
-						"type": "text"
-					}
-				],
+				"header": [],
 				"url": {
 					"raw": "http://{{baseUrl}}/orders",
 					"protocol": "http",
@@ -168,16 +287,22 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let cookieJar = pm.cookies.jar();",
+							"let consumerSessionId = pm.collectionVariables.get(\"consumerSessionId\");",
+							"cookieJar.set(\"{{$baseUrl}}\", \"session_id\", consumerSessionId);"
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
 				"method": "POST",
 				"header": [
-					{
-						"key": "x-user-id",
-						"value": "{{consumerId}}",
-						"type": "text"
-					},
 					{
 						"key": "If-Match",
 						"value": "{{lastVersion}}",
@@ -186,7 +311,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"consumerId\": \"{{consumerId}}\",\n  \"items\": [\n    {\n      \"itemId\": \"{{itemId}}\",\n      \"title\": \"Самокат\",\n      \"description\": \"Самый лучший самокат\",\n      \"quantity\": 1,\n      \"price\": 50\n    }\n  ],\n  \"delivery\": {\n    \"type\": \"self-delivery\",\n    \"city\": \"Moscow\",\n    \"datetime\": \"2021-09-09T12:00:00\"\n  }\n}",
+					"raw": "{\n  \"consumerId\": \"{{consumerSessionId}}\",\n  \"items\": [\n    {\n      \"itemId\": \"{{itemId}}\",\n      \"title\": \"Самокат\",\n      \"description\": \"Самый лучший самокат\",\n      \"quantity\": 1,\n      \"price\": 50\n    }\n  ],\n  \"delivery\": {\n    \"type\": \"self-delivery\",\n    \"city\": \"Moscow\",\n    \"datetime\": \"2021-09-09T12:00:00\"\n  }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -228,17 +353,22 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let cookieJar = pm.cookies.jar();",
+							"let consumerSessionId = pm.collectionVariables.get(\"consumerSessionId\");",
+							"cookieJar.set(\"{{$baseUrl}}\", \"session_id\", consumerSessionId);"
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
 				"method": "GET",
-				"header": [
-					{
-						"key": "x-user-id",
-						"value": "{{consumerId}}",
-						"type": "text"
-					}
-				],
+				"header": [],
 				"url": {
 					"raw": "http://{{baseUrl}}/orders/{{orderId}}",
 					"protocol": "http",
@@ -311,13 +441,7 @@
 			],
 			"request": {
 				"method": "GET",
-				"header": [
-					{
-						"key": "x-user-id",
-						"value": "{{consumerId}}",
-						"type": "text"
-					}
-				],
+				"header": [],
 				"url": {
 					"raw": "http://{{baseUrl}}/payments",
 					"protocol": "http",
@@ -353,13 +477,7 @@
 			],
 			"request": {
 				"method": "GET",
-				"header": [
-					{
-						"key": "x-user-id",
-						"value": "{{consumerId}}",
-						"type": "text"
-					}
-				],
+				"header": [],
 				"url": {
 					"raw": "http://{{baseUrl}}/items/reservations",
 					"protocol": "http",
@@ -437,11 +555,6 @@
 				"method": "POST",
 				"header": [
 					{
-						"key": "x-user-id",
-						"value": "{{consumerId}}",
-						"type": "text"
-					},
-					{
 						"key": "If-Match",
 						"value": "{{lastVersion}}",
 						"type": "text"
@@ -470,7 +583,7 @@
 			"response": []
 		},
 		{
-			"name": "Check an order",
+			"name": "Check an order 2",
 			"event": [
 				{
 					"listen": "test",
@@ -488,13 +601,7 @@
 			],
 			"request": {
 				"method": "GET",
-				"header": [
-					{
-						"key": "x-user-id",
-						"value": "{{consumerId}}",
-						"type": "text"
-					}
-				],
+				"header": [],
 				"url": {
 					"raw": "http://{{baseUrl}}/orders/{{failedOrderId}}",
 					"protocol": "http",
@@ -510,7 +617,7 @@
 			"response": []
 		},
 		{
-			"name": "Check reservations",
+			"name": "Check reservations 2",
 			"event": [
 				{
 					"listen": "test",
@@ -531,13 +638,7 @@
 			],
 			"request": {
 				"method": "GET",
-				"header": [
-					{
-						"key": "x-user-id",
-						"value": "{{consumerId}}",
-						"type": "text"
-					}
-				],
+				"header": [],
 				"url": {
 					"raw": "http://{{baseUrl}}/items/reservations",
 					"protocol": "http",
@@ -612,6 +713,18 @@
 		},
 		{
 			"key": "lastVersion",
+			"value": ""
+		},
+		{
+			"key": "consumerLogin",
+			"value": ""
+		},
+		{
+			"key": "consumerPassword",
+			"value": ""
+		},
+		{
+			"key": "consumerSessionId",
 			"value": ""
 		}
 	]
