@@ -80,6 +80,10 @@ tolerations: []
 
 affinity: {}
 
+metrics:
+  serviceMonitor:
+    enabled: true
+
 postgresql:
   enabled: true
   postgresqlUsername: postgres
@@ -89,9 +93,9 @@ postgresql:
   service:
     port: "5432"
   metrics:
-    enabled: false
+    enabled: true
     serviceMonitor:
-      enabled: false
+      enabled: true
   resources:
     requests:
       cpu: 500m

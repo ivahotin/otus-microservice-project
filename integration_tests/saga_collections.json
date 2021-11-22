@@ -283,7 +283,7 @@
 							"    pm.collectionVariables.set(\"orderId\", jsonData.orderId);",
 							"});",
 							"",
-							"setTimeout(() => {}, 10000);"
+							"setTimeout(() => {}, 20000);"
 						],
 						"type": "text/javascript"
 					}
@@ -545,7 +545,7 @@
 							"    pm.collectionVariables.set(\"failedOrderId\", jsonData.orderId);",
 							"});",
 							"",
-							"setTimeout(() => {}, 10000); "
+							"setTimeout(() => {}, 20000); "
 						],
 						"type": "text/javascript"
 					}
